@@ -7,7 +7,7 @@
 *国内注意PIP换源，命令为：`pip config set global.index-url https://mirrors.bfsu.edu.cn/pypi/web/simple`*
 
 ## 数据处理指导
-1. 解压数据集：将`data`目录下的`Skeleton.zip`解压，这一操作会自然的创建出一个子目录`Skeleton`,也就是说，这一操作后，您的目录结构应该是
+1. 解压数据集：将`Skeleton.zip`在`data`目录下解压，这一操作会自然的创建出一个子目录`Skeleton`,也就是说，这一操作后，您的目录结构应该是
 ```
 data
 └───Skeleton
