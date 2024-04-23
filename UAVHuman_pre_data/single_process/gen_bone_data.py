@@ -1,7 +1,4 @@
 import os
-
-from tqdm import tqdm
-import multiprocessing
 import numpy as np
 from numpy.lib.format import open_memmap
 
@@ -28,22 +25,19 @@ datasets = {
 }
 
 # bone
-def gen_bone(dataset, set):
-    print(dataset, set)
-    data = np.load('./data/{}/{}_data_joint.npy'.format(dataset, set))
-    N, C, T, V, M = data.shape
-    fp_sp = open_memmap('./data/{}/{}_data_bone.npy'.format(dataset, set),dtype='float32',mode='w+',shape=(N, 3, T, V, M))
-    fp_sp[:, :C, :, :, :] = data
-    for v1, v2 in tqdm(paris[dataset]):
-        fp_sp[:, :, :, v1, :] = data[:, :, :, v1, :] - data[:, :, :, v2, :]
-
-processes = []
+from tqdm import tqdm
 
 for dataset in datasets:
     for set in sets:
-        process = multiprocessing.Process(target=gen_bone, args=(dataset, set))
-        processes.append(process)
-        process.start()
+        print(dataset, set)
+        data = np.load('./data/{}/{}_data_joint.npy'.format(dataset, set))
+        N, C, T, V, M = data.shape
+        fp_sp = open_memmap(
+            './data/{}/{}_data_bone.npy'.format(dataset, set),
+            dtype='float32',
+            mode='w+',
+            shape=(N, 3, T, V, M))
 
-for process in processes:
-    process.join()
+        fp_sp[:, :C, :, :, :] = data
+        for v1, v2 in tqdm(paris[dataset]):
+            fp_sp[:, :, :, v1, :] = data[:, :, :, v1, :] - data[:, :, :, v2, :]
