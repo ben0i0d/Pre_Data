@@ -13,8 +13,6 @@ import re
 import numpy as np
 from tqdm import tqdm
 
-import multiprocessing
-
 from pose_data_tools.preprocess import pre_normalization
 
 MAX_BODY_TRUE = 2
@@ -133,14 +131,11 @@ def gendata(data_path,
 
 if __name__ == '__main__':
 
-    path_list = ['data/v1','data/v2']
-    part = ['train', 'test']
-    processes = []
-    for path in path_list:
-        for p in part:
-            process = multiprocessing.Process(target=gendata, args=(path, p))
-            processes.append(process)
-            process.start()
+    parser = argparse.ArgumentParser(description='UAVHuman Data Converter.')
+    parser.add_argument('--data_path', required=True)
+    args = parser.parse_args()
 
-    for process in processes:
-        process.join()
+    gendata(data_path=args.data_path,
+            split='train')
+    gendata(data_path=args.data_path,
+            split='test')

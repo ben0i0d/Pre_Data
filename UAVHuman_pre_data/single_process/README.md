@@ -8,10 +8,6 @@
 
 ## 数据处理指导
 
-注意：默认我们启动了多线程，以加快处理速度，通常可带来2-4倍的性能提升。
-
-但是这会带来更多的内存消耗，如果您运行发现内存不够，请使用single_process文件夹中的单线程代码
-
 1. 解压数据集：将`Skeleton.zip`在`data`目录下解压，这一操作会自然的创建出一个子目录`Skeleton`,也就是说，这一操作后，您的目录结构应该是
 ```
 data
@@ -29,13 +25,17 @@ In cross-subject-v2 evaluation, we split 119 subjects into training and testing 
 ```
 因此先运行
 ```
-python split.py 
+python split_v1.py 
+
+python split_v2.py 
 ```
 即可得到划分好的数据集。
 3. 数据集处理为npy格式(joint模态)：
 运行以下命令得到npy格式的数据
 ```
-python generate_data.py
+python generate_data.py --data_path data/v1 
+
+python generate_data.py --data_path data/v2 
 ```
 4. 数据集处理出bone模态数据（可选）：
 骨架数据包括原始的关节点数据，还包括根据连通性将关节连接起来的骨骼数据
