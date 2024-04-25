@@ -3,17 +3,14 @@ Script to process raw data and generate dataset's binary files:
     - .npy skeleton data files: np.array of shape B x C x V x T x M
     - .pkl label files: (filename: str, label: list[int])
 """
-
-import argparse
-import pickle
 import os
-import glob
 import re
-
+import glob
+import pickle
 import numpy as np
 from tqdm import tqdm
-
 import multiprocessing
+from numpy.lib.format import open_memmap
 
 from pose_data_tools.preprocess import pre_normalization
 
@@ -96,8 +93,7 @@ def read_xyz(file, max_body, num_joint):
     return data
 
 
-def gendata(data_path,
-            split):
+def gendata(data_path,split):
 
     out_path = data_path
     data_path = os.path.join(data_path, split)
@@ -111,17 +107,13 @@ def gendata(data_path,
         if not os.path.exists(filename):
             raise OSError('%s does not exist!' %filename)
         sample_name.append(filename)
-
-    data = np.zeros((len(sample_name), 3, MAX_FRAME, NUM_JOINT, MAX_BODY_TRUE), dtype=np.float32)
+    data = open_memmap('{}/{}_data_joint.npy'.format(out_path, split),dtype='float32',mode='w+',shape=((len(sample_name), 3, MAX_FRAME, NUM_JOINT, MAX_BODY_TRUE)))
     for i, s in enumerate(tqdm(sample_name)):
         sample = read_xyz(s, max_body=MAX_BODY_KINECT, num_joint=NUM_JOINT)
         sample = sample[:, :MAX_FRAME, :, :]
         data[i, :, 0:sample.shape[1], :, :] = sample
     data = pre_normalization(data)
-
-    np.save('{}/{}_data_joint.npy'.format(out_path, split), data)
-
-    #if split != 'test':
+    
     sample_label = []
     for basename in skeleton_filenames:
         label = int(re.match(FILENAME_REGEX, basename).groups()[0])
