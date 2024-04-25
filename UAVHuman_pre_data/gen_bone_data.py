@@ -1,8 +1,7 @@
 import os
-
+import numpy as np
 from tqdm import tqdm
 import multiprocessing
-import numpy as np
 from numpy.lib.format import open_memmap
 
 # uav graph
@@ -30,7 +29,7 @@ datasets = {
 # bone
 def gen_bone(dataset, set):
     print(dataset, set)
-    data = np.load('./data/{}/{}_data_joint.npy'.format(dataset, set))
+    data = open_memmap('./data/{}/{}_data_joint.npy'.format(dataset, set),mode='r')
     N, C, T, V, M = data.shape
     fp_sp = open_memmap('./data/{}/{}_data_bone.npy'.format(dataset, set),dtype='float32',mode='w+',shape=(N, 3, T, V, M))
     fp_sp[:, :C, :, :, :] = data

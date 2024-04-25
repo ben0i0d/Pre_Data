@@ -1,7 +1,8 @@
 import os
 import numpy as np
+from tqdm import tqdm
 from numpy.lib.format import open_memmap
-import multiprocessing
+
 sets = {
     'train', 'test'
 }
@@ -14,31 +15,17 @@ parts = {
     'joint', 'bone'
 }
 
-from tqdm import tqdm
 
-def gen_motion(dataset, set):
-    for dataset in datasets:
-        for set in sets:
-            for part in parts:
-                print(dataset, set, part)
-                data = np.load('./data/{}/{}_data_{}.npy'.format(dataset, set, part))
-                N, C, T, V, M = data.shape
-                fp_sp = open_memmap(
-                    './data/{}/{}_data_{}_motion.npy'.format(dataset, set, part),
-                    dtype='float32',
-                    mode='w+',
-                    shape=(N, 3, T, V, M))
-                for t in tqdm(range(T - 1)):
-                    fp_sp[:, :, t, :, :] = data[:, :, t + 1, :, :] - data[:, :, t, :, :]
-                fp_sp[:, :, T - 1, :, :] = 0
-
-processes = []
+def gen_motion(dataset, set,part):
+    print(dataset, set, part)
+    data = open_memmap('./data/{}/{}_data_{}.npy'.format(dataset, set, part),mode='r')
+    N, C, T, V, M = data.shape
+    fp_sp = open_memmap('./data/{}/{}_data_{}_motion.npy'.format(dataset, set, part),dtype='float32',mode='w+',shape=(N, 3, T, V, M))
+    for t in tqdm(range(T - 1)):
+        fp_sp[:, :, t, :, :] = data[:, :, t + 1, :, :] - data[:, :, t, :, :]
+    fp_sp[:, :, T - 1, :, :] = 0
 
 for dataset in datasets:
     for set in sets:
-        process = multiprocessing.Process(target=gen_motion, args=(dataset, set))
-        processes.append(process)
-        process.start()
-
-for process in processes:
-    process.join()
+        for part in parts:
+            gen_motion(dataset, set, part)
