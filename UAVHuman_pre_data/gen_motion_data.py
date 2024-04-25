@@ -1,7 +1,6 @@
 import os
 import numpy as np
 from tqdm import tqdm
-import multiprocessing
 from numpy.lib.format import open_memmap
 
 sets = {
@@ -26,14 +25,7 @@ def gen_motion(dataset, set,part):
         fp_sp[:, :, t, :, :] = data[:, :, t + 1, :, :] - data[:, :, t, :, :]
     fp_sp[:, :, T - 1, :, :] = 0
 
-processes = []
-
 for dataset in datasets:
     for set in sets:
         for part in parts:
-            process = multiprocessing.Process(target=gen_motion, args=(dataset, set, part))
-            processes.append(process)
-            process.start()
-
-for process in processes:
-    process.join()
+            gen_motion(dataset, set, part)
