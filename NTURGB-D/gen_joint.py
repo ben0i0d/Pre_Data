@@ -102,7 +102,7 @@ def gendata(data_path,out_path,ignored_sample_path=None,benchmark='xview',part='
     with open('{}/{}_label.pkl'.format(out_path, part), 'wb') as f:
         pickle.dump((sample_name, list(sample_label)), f)
 
-    fp = open_memmap('{}/{}_data.npy'.format(out_path, part),dtype='float32',mode='w+',shape=(len(sample_label), 3, max_frame, num_joint, max_body))
+    fp = open_memmap('{}/{}_joint.npy'.format(out_path, part),dtype='float32',mode='w+',shape=(len(sample_label), 3, max_frame, num_joint, max_body))
 
     for i, s in enumerate(tqdm(sample_name)):
         data = read_xyz(os.path.join(data_path, s), max_body=max_body, num_joint=num_joint)

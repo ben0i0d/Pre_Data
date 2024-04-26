@@ -29,10 +29,9 @@ datasets = {
 # bone
 def gen_bone(dataset, set):
     print(dataset, set)
-    data = open_memmap('./data/{}/{}_data_joint.npy'.format(dataset, set),mode='r')
+    data = open_memmap('./data/{}/{}_joint.npy'.format(dataset, set),mode='r')
     N, C, T, V, M = data.shape
-    fp_sp = open_memmap('./data/{}/{}_data_bone.npy'.format(dataset, set),dtype='float32',mode='w+',shape=(N, 3, T, V, M))
-    fp_sp[:, :C, :, :, :] = data
+    fp_sp = open_memmap('./data/{}/{}_bone.npy'.format(dataset, set),dtype='float32',mode='w+',shape=(N, 3, T, V, M))
     for v1, v2 in tqdm(paris[dataset]):
         fp_sp[:, :, :, v1, :] = data[:, :, :, v1, :] - data[:, :, :, v2, :]
 

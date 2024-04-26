@@ -107,7 +107,7 @@ def gendata(data_path,split):
         if not os.path.exists(filename):
             raise OSError('%s does not exist!' %filename)
         sample_name.append(filename)
-    data = open_memmap('{}/{}_data_joint.npy'.format(out_path, split),dtype='float32',mode='w+',shape=((len(sample_name), 3, MAX_FRAME, NUM_JOINT, MAX_BODY_TRUE)))
+    data = open_memmap('{}/{}_joint.npy'.format(out_path, split),dtype='float32',mode='w+',shape=((len(sample_name), 3, MAX_FRAME, NUM_JOINT, MAX_BODY_TRUE)))
     for i, s in enumerate(tqdm(sample_name)):
         sample = read_xyz(s, max_body=MAX_BODY_KINECT, num_joint=NUM_JOINT)
         sample = sample[:, :MAX_FRAME, :, :]
