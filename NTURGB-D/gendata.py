@@ -1,5 +1,4 @@
 import os
-import sys
 import pickle
 import argparse
 import numpy as np
@@ -13,7 +12,6 @@ training_cameras = [2, 3]
 max_body = 2
 num_joint = 25
 max_frame = 300
-toolbar_width = 30
 
 def read_skeleton(file):
     with open(file, 'r') as f:
@@ -103,7 +101,6 @@ def gendata(data_path,out_path,ignored_sample_path=None,benchmark='xview',part='
 
     with open('{}/{}_label.pkl'.format(out_path, part), 'wb') as f:
         pickle.dump((sample_name, list(sample_label)), f)
-    # np.save('{}/{}_label.npy'.format(out_path, part), sample_label)
 
     fp = open_memmap('{}/{}_data.npy'.format(out_path, part),dtype='float32',mode='w+',shape=(len(sample_label), 3, max_frame, num_joint, max_body))
 
