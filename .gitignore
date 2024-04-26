@@ -1,5 +1,8 @@
-UAVHuman_pre_data/data/Skeleton.zip
-UAVHuman_pre_data/data/v1
-UAVHuman_pre_data/data/v2
-UAVHuman_pre_data/data/Skeleton
-UAVHuman_pre_data/pose_data_tools/__pycache__
+NTURGB-D/data/nturgb+d_skeletons
+NTURGB-D/data/xsub
+NTURGB-D/data/xview
+UAV-Human/data/Skeleton.zip
+UAV-Human/data/v1
+UAV-Human/data/v2
+UAV-Human/data/Skeleton
+UAV-Human/pose_data_tools/__pycache__

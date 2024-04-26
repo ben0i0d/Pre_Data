@@ -4,11 +4,11 @@ import multiprocessing
 from numpy.lib.format import open_memmap
 
 sets = {
-    'train', 'test'
+    'train', 'val'
 }
 
 datasets = {
-    'v1', 'v2',
+    'xsub', 'xview',
 }
 
 def merge_joint_bone_data(dataset, set):

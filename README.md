@@ -1,13 +1,23 @@
 # Pre_Data
 
-data prepare code
+Data preparation code to provide consistent and high-performance processing
 
 ## dataset
 
-1. UAV_Human: Skeleton (action recognition)
-2. SHL_2024
+1. UAV-Human: Skeleton (action recognition)
+2. NTURGB-D：Skeleton (action recognition) [ST-GCN]
 
+## Target needs
+
+1. Mem：Not greater 16G
+2. Time：At least faster than the original code
+
+*We will load data into memory for some operations to speed up, but ensure that the memory requirement is not greater than 16G.*
+
+*16G is not just a project requirement, the test scenario is on a Debian system, and it also starts daily tasks such as browsers*
 ## 注意
 
-1. 数据预处理使用了大量的性能优化，优化目标是“尽量减少内存需求，尽量提高并发性能”，我们设法在速度与需求取得一个合理的平衡
-2. 如果您愿意承担内存消耗，可以将`open_memmap`替换为`np.load`或者`np.save`来加速处理
+1. Data preprocessing uses a lot of performance optimizations, the goal of which is trying to strike a reasonable balance between speed and demand
+2. If you are willing to bear the memory consumption, you can replace 'open_memmap' with 'np.load' or 'np.save' to speed up the processing
+3. This project has a high demand for I/O to ensure that it works on a medium with high I/O capability
+4. Some datasets have different preprocessing patterns in different projects, and to avoid ambiguity, I have indicated the source in "[]".

@@ -63,18 +63,18 @@ python merge_joint_bone_data.py
         ├───P000S00G10B10H10UC022000LC021000A001R0_08241716.txt
         └───...
     ├── train_label.pkl
-    ├── train_data_bone_motion.npy
-    ├── train_data_bone.npy
-    ├── train_data_joint_bone.npy
-    ├── train_data_joint_motion.npy
-    ├── train_data_joint.npy
+    ├── train_bone_motion.npy
+    ├── train_bone.npy
+    ├── train_joint_bone.npy
+    ├── train_joint_motion.npy
+    ├── train_joint.npy
     └── train_label.pkl
     ├── test_label.pkl
-    ├── test_data_bone_motion.npy
-    ├── test_data_bone.npy
-    ├── test_data_joint_bone.npy
-    ├── test_data_joint_motion.npy
-    ├── test_data_joint.npy
+    ├── test_bone_motion.npy
+    ├── test_bone.npy
+    ├── test_joint_bone.npy
+    ├── test_joint_motion.npy
+    ├── test_joint.npy
     └── test_label.pkl
 ```
 ## 完整流程演示
