@@ -12,7 +12,7 @@ from tqdm import tqdm
 import multiprocessing
 from numpy.lib.format import open_memmap
 
-from pose_data_tools.preprocess import pre_normalization
+from preprocess import pre_normalization
 
 MAX_BODY_TRUE = 2
 MAX_BODY_KINECT = 4
