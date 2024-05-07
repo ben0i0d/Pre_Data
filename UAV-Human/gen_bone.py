@@ -1,7 +1,4 @@
-import os
-import numpy as np
 from tqdm import tqdm
-import multiprocessing
 from numpy.lib.format import open_memmap
 
 # uav graph
@@ -35,13 +32,20 @@ def gen_bone(dataset, set):
     for v1, v2 in tqdm(paris[dataset]):
         fp_sp[:, :, :, v1, :] = data[:, :, :, v1, :] - data[:, :, :, v2, :]
 
-processes = []
+if __name__ == '__main__':
 
-for dataset in datasets:
-    for set in sets:
-        process = multiprocessing.Process(target=gen_bone, args=(dataset, set))
-        processes.append(process)
-        process.start()
-
-for process in processes:
-    process.join()
+    # Multiprocessing
+    import multiprocessing
+    processes = []
+    for dataset in datasets:
+        for set in sets:
+            process = multiprocessing.Process(target=gen_bone, args=(dataset, set))
+            processes.append(process)
+            process.start()
+    for process in processes:
+        process.join()
+    
+    # Singleprocessing
+    # for dataset in datasets:
+    #     for set in sets:
+    #         gen_bone(dataset, set)

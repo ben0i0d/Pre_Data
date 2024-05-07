@@ -10,6 +10,20 @@
 
 注意：默认我们启动了多线程，以加快处理速度，通常可带来2-4倍的性能提升。
 
+在进一步验证中，我们发现Windows多线程处理会存在一些问题（包括内存占用异常增加），或者系统盘与工作区在一个存储介质上，也会存在一些问题（系统IO耗尽导致死机卡顿）。
+
+因此，我们提供了可选的单线程处理方式，如果遇到上述问题，可以使用单线程处理。
+
+### 单线程处理
+
+在以下提到的`.py`中，将`multiprocessing`注释即可。
+
+### 多线程处理
+
+在以下提到的`.py`中，将`singleprocessing`注释即可。
+
+### 预处理流程
+
 1. 解压数据集：将`Skeleton.zip`在`data`目录下解压，这一操作会自然的创建出一个子目录`Skeleton`,也就是说，这一操作后，您的目录结构应该是
 ```
 data
@@ -33,23 +47,23 @@ python split.py
 3. 数据集处理为npy格式(joint模态)：
 运行以下命令得到npy格式的数据
 ```
-python generate_data.py
+python gen_joint.py
 ```
 4. 数据集处理出bone模态数据（可选）：
 骨架数据包括原始的关节点数据，还包括根据连通性将关节连接起来的骨骼数据
 运行以下命令得到出bone模态npy格式的数据
 ```
-python gen_bone_data.py
+python gen_bone.py
 ```
 5. 数据集处理出motion模态数据（可选）：
 运行以下命令得到出motion模态的数据
 ```
-python gen_motion_data.py
+python gen_motion.py
 ```
 6. bone模态与joint模态合并（可选）：
 运行以下命令得到出bone模态的数据
 ```
-python merge_joint_bone_data.py
+python merge_joint_bone.py
 ```
 7. 最终你会得到如下所展示的目录结构与文件
 ```
@@ -68,18 +82,18 @@ python merge_joint_bone_data.py
     ├── train_joint_bone.npy
     ├── train_joint_motion.npy
     ├── train_joint.npy
-    └── train_label.pkl
     ├── test_label.pkl
     ├── test_bone_motion.npy
     ├── test_bone.npy
     ├── test_joint_bone.npy
     ├── test_joint_motion.npy
     ├── test_joint.npy
-    └── test_label.pkl
 ```
 ## 完整流程演示
 如果还有问题，请参考或直接运行我们的`data-process.ipynb`文件，该文件内包括代码，运行结果，注释等。
 
 ## 在线代码仓库
+
+（我们在这个仓库内提交更多的修正与优化等）
 
 https://github.com/ben0i0d/Pre_Data
