@@ -9,7 +9,6 @@ import glob
 import pickle
 import numpy as np
 from tqdm import tqdm
-import multiprocessing
 from numpy.lib.format import open_memmap
 
 from preprocess import pre_normalization
@@ -127,12 +126,19 @@ if __name__ == '__main__':
 
     path_list = ['data/v1','data/v2']
     part = ['train', 'test']
+    
+    # Multiprocessing
+    import multiprocessing
     processes = []
     for path in path_list:
         for p in part:
             process = multiprocessing.Process(target=gendata, args=(path, p))
             processes.append(process)
             process.start()
-
     for process in processes:
         process.join()
+
+    # Singleprocessing
+    # for path in path_list:
+    #     for p in part:
+    #         gendata(path, p)

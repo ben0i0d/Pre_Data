@@ -1,6 +1,3 @@
-import os
-import numpy as np
-import multiprocessing
 from numpy.lib.format import open_memmap
 
 sets = {
@@ -20,13 +17,18 @@ def merge_joint_bone_data(dataset, set):
     data_jpt_bone[:, :C, :, :, :] = data_jpt
     data_jpt_bone[:, C:, :, :, :] = data_bone
 
-processes = []
-
-for dataset in datasets:
-    for set in sets:
-        process = multiprocessing.Process(target=merge_joint_bone_data, args=(dataset, set))
-        processes.append(process)
-        process.start()
-
-for process in processes:
-    process.join()
+if __name__ == '__main__':
+    # Multiprocessing
+    import multiprocessing
+    processes = []
+    for dataset in datasets:
+        for set in sets:
+            process = multiprocessing.Process(target=merge_joint_bone_data, args=(dataset, set))
+            processes.append(process)
+            process.start()
+    for process in processes:
+        process.join()
+    # Singleprocessing
+    # for dataset in datasets:
+    #     for set in sets:
+    #         merge_joint_bone_data(dataset, set)

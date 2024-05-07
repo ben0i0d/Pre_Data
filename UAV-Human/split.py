@@ -1,8 +1,5 @@
 import os
-import pickle
-import os
 import glob
-import multiprocessing
 from shutil import copyfile
 
 def split_list(skeleton_filenames,train_list,all_path,path):
@@ -45,12 +42,18 @@ for path in path_list:
 skeleton_filenames = [os.path.basename(f) for f in
     glob.glob(os.path.join(path_list[0], "**.txt"), recursive=True)]
 
-processes = []
+if __name__ == '__main__':
 
-for i in range(1,3):
-    process = multiprocessing.Process(target=split_list, args=(skeleton_filenames, list[i-1], path_list[0],path_list[i]))
-    processes.append(process)
-    process.start()
+    # Multiprocessing
+    import multiprocessing
+    processes = []
+    for i in range(1,3):
+        process = multiprocessing.Process(target=split_list, args=(skeleton_filenames, list[i-1], path_list[0],path_list[i]))
+        processes.append(process)
+        process.start()
+    for process in processes:
+        process.join()
 
-for process in processes:
-    process.join()
+    # Singleprocessing
+    # for i in range(1,3):
+    #     split_list(skeleton_filenames, list[i-1], path_list[0],path_list[i])

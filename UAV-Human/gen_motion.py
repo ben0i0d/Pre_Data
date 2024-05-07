@@ -1,5 +1,3 @@
-import os
-import numpy as np
 from tqdm import tqdm
 from numpy.lib.format import open_memmap
 
@@ -25,7 +23,9 @@ def gen_motion(dataset, set,part):
         fp_sp[:, :, t, :, :] = data[:, :, t + 1, :, :] - data[:, :, t, :, :]
     fp_sp[:, :, T - 1, :, :] = 0
 
-for dataset in datasets:
-    for set in sets:
-        for part in parts:
-            gen_motion(dataset, set, part)
+if __name__ == '__main__':
+    # Singleprocessing
+    for dataset in datasets:
+        for set in sets:
+            for part in parts:
+                gen_motion(dataset, set, part)
