@@ -1,6 +1,11 @@
 import os
 import glob
+import argparse
+import multiprocessing
 from shutil import copyfile
+
+parser = argparse.ArgumentParser(description='Dataset Preprocessing')
+parser.add_argument('--use_mp', type=bool, default=False, help='use multi processing or not')
 
 def split_list(skeleton_filenames,train_list,all_path,path):
     train_name = []
@@ -43,17 +48,19 @@ skeleton_filenames = [os.path.basename(f) for f in
     glob.glob(os.path.join(path_list[0], "**.txt"), recursive=True)]
 
 if __name__ == '__main__':
-
+    args = parser.parse_args()
     # Multiprocessing
-    import multiprocessing
-    processes = []
-    for i in range(1,3):
-        process = multiprocessing.Process(target=split_list, args=(skeleton_filenames, list[i-1], path_list[0],path_list[i]))
-        processes.append(process)
-        process.start()
-    for process in processes:
-        process.join()
-
+    if args.use_mp:
+        processes = []
+        for i in range(1,3):
+            process = multiprocessing.Process(target=split_list, args=(skeleton_filenames, list[i-1], path_list[0],path_list[i]))
+            processes.append(process)
+            process.start()
+        for process in processes:
+            process.join()
     # Singleprocessing
-    # for i in range(1,3):
-    #     split_list(skeleton_filenames, list[i-1], path_list[0],path_list[i])
+    elif not args.use_mp:
+        for i in range(1,3):
+            split_list(skeleton_filenames, list[i-1], path_list[0],path_list[i])
+    else:
+        raise ValueError('Invalid option')

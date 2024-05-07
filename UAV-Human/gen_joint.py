@@ -7,11 +7,17 @@ import os
 import re
 import glob
 import pickle
+import argparse
 import numpy as np
 from tqdm import tqdm
+import multiprocessing
 from numpy.lib.format import open_memmap
 
 from preprocess import pre_normalization
+
+parser = argparse.ArgumentParser(description='Dataset Preprocessing')
+parser.add_argument('--use_mp', type=bool, default=False, help='use multi processing or not')
+
 
 MAX_BODY_TRUE = 2
 MAX_BODY_KINECT = 4
@@ -118,27 +124,27 @@ def gendata(data_path,split):
         label = int(re.match(FILENAME_REGEX, basename).groups()[0])
         sample_label.append(label)
 
-    with open('{}/{}_label.pkl'.format(out_path, split), 'wb') as f:
-        pickle.dump((sample_name, list(sample_label)), f)
-
-
+    np.save('{}/{}_label.npy'.format(out_path, split), np.array(sample_label))
+    
 if __name__ == '__main__':
 
     path_list = ['data/v1','data/v2']
     part = ['train', 'test']
-    
+    args = parser.parse_args()
     # Multiprocessing
-    import multiprocessing
-    processes = []
-    for path in path_list:
-        for p in part:
-            process = multiprocessing.Process(target=gendata, args=(path, p))
-            processes.append(process)
-            process.start()
-    for process in processes:
-        process.join()
-
+    if args.use_mp:
+        processes = []
+        for path in path_list:
+            for p in part:
+                process = multiprocessing.Process(target=gendata, args=(path, p))
+                processes.append(process)
+                process.start()
+        for process in processes:
+            process.join()
     # Singleprocessing
-    # for path in path_list:
-    #     for p in part:
-    #         gendata(path, p)
+    elif not args.use_mp:
+        for path in path_list:
+            for p in part:
+                gendata(path, p)
+    else:
+        raise ValueError('Invalid option')
