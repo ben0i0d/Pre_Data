@@ -24,6 +24,18 @@ def gen_motion(dataset, set,part):
     fp_sp[:, :, T - 1, :, :] = 0
 
 if __name__ == '__main__':
+    # Multiprocessing
+    # import multiprocessing
+    # processes = []
+    # for dataset in datasets:
+    #     for set in sets:
+    #         for part in parts:
+    #             process = multiprocessing.Process(target=gen_motion, args=(dataset, set, part))
+    #             processes.append(process)
+    #             process.start()
+    #     for process in processes:
+    #         process.join()
+    
     # Singleprocessing
     for dataset in datasets:
         for set in sets:
