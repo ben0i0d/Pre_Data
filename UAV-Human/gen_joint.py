@@ -124,10 +124,8 @@ def gendata(data_path,split):
         label = int(re.match(FILENAME_REGEX, basename).groups()[0])
         sample_label.append(label)
 
-    with open('{}/{}_label.pkl'.format(out_path, split), 'wb') as f:
-        pickle.dump((sample_name, list(sample_label)), f)
-
-
+    np.save('{}/{}_label.npy'.format(out_path, split), np.array(sample_label))
+    
 if __name__ == '__main__':
 
     path_list = ['data/v1','data/v2']
