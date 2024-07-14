@@ -1,11 +1,9 @@
 import argparse
 from tqdm import tqdm
-import multiprocessing
 from numpy.lib.format import open_memmap
 
 parser = argparse.ArgumentParser(description='Dataset Preprocessing')
-parser.add_argument('--use_mp', type=bool, default=False, help='use multi processing or not')
-parser.add_argument('--modal', type=str, default='bone', help='use multi processing or not')
+parser.add_argument('--modal', type=str, default='bone', help='gen_modal')
 
 # uav graph
     # (10, 8), (8, 6), (9, 7), (7, 5), # arms
@@ -49,48 +47,19 @@ def gen_motion(dataset, set,part):
 
 if __name__ == '__main__':
     args = parser.parse_args()
-    # Multiprocessing
-    if args.use_mp:
-        processes = []
-        if args.modal == 'bone':   
-            for dataset in datasets:
-                for set in sets:
-                    process = multiprocessing.Process(target=gen_bone, args=(dataset, set))
-                    processes.append(process)
-                    process.start()
-        elif args.modal == 'jmb':
-            for dataset in datasets:
-                for set in sets:
-                    process = multiprocessing.Process(target=merge_joint_bone_data, args=(dataset, set))
-                    processes.append(process)
-                    process.start()
-        elif args.modal == 'motion':
-            for dataset in datasets:
-                for set in sets:
-                    for part in parts:
-                        process = multiprocessing.Process(target=gen_motion, args=(dataset, set, part))
-                        processes.append(process)
-                        process.start()
-        else:
-            raise ValueError('Invalid Modal')
-        for process in processes:
-            process.join()
-    # Singleprocessing
-    elif not args.use_mp:
-        if args.modal == 'bone':   
-            for dataset in datasets:
-                for set in sets:
-                    gen_bone(dataset, set)
-        elif args.modal == 'jmb':
-            for dataset in datasets:
-                for set in sets:
-                    merge_joint_bone_data(dataset, set)
-        elif args.modal == 'motion':
-            for dataset in datasets:
-                for set in sets:
-                    for part in parts:
-                        gen_motion(dataset, set, part)
-        else:
-            raise ValueError('Invalid Modal')
+
+    if args.modal == 'bone':   
+        for dataset in datasets:
+            for set in sets:
+                gen_bone(dataset, set)
+    elif args.modal == 'jmb':
+        for dataset in datasets:
+            for set in sets:
+                merge_joint_bone_data(dataset, set)
+    elif args.modal == 'motion':
+        for dataset in datasets:
+            for set in sets:
+                for part in parts:
+                    gen_motion(dataset, set, part)
     else:
-        raise ValueError('Invalid use_mp set,only True or False')
+        raise ValueError('Invalid Modal')

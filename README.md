@@ -6,6 +6,7 @@ Data preparation code to provide consistent and high-performance processing
 
 1. UAV-Human: Skeleton (action recognition)
 2. NTURGB-D：Skeleton (action recognition) [ST-GCN]
+2. NTURGB-D：Skeleton (action recognition) [CTR-GCN]
 
 ## Target needs
 

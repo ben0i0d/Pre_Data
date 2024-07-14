@@ -7,7 +7,7 @@ Main call is pre_normalization:
 """
 
 import math
-
+import numba
 import numpy as np
 from tqdm import tqdm
 
@@ -92,7 +92,7 @@ def pre_normalization(data, center_joint=1, zaxis=[11, 5], xaxis=[]):
     data = np.transpose(s, [0, 4, 2, 3, 1])
     return data
 
-
+@numba.jit(nopython=True)
 def rotation_matrix(axis, theta):
     """
     Return the rotation matrix associated with counterclockwise rotation about
@@ -110,12 +110,6 @@ def rotation_matrix(axis, theta):
                      [2 * (bc - ad), aa + cc - bb - dd, 2 * (cd + ab)],
                      [2 * (bd + ac), 2 * (cd - ab), aa + dd - bb - cc]])
 
-
-def unit_vector(vector):
-    """ Returns the unit vector of the vector.  """
-    return vector / np.linalg.norm(vector)
-
-
 def angle_between(v1, v2):
     """ Returns the angle in radians between vectors 'v1' and 'v2'::
 
@@ -128,23 +122,24 @@ def angle_between(v1, v2):
     """
     if np.abs(v1).sum() < 1e-6 or np.abs(v2).sum() < 1e-6:
         return 0
-    v1_u = unit_vector(v1)
-    v2_u = unit_vector(v2)
+    """ Returns the unit vector of the vector.  """
+    v1_u = v1 / np.linalg.norm(v1)
+    v2_u = v2 / np.linalg.norm(v2)
     return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
 
-
+@numba.jit(nopython=True)
 def x_rotation(vector, theta):
     """Rotates 3-D vector around x-axis"""
     R = np.array([[1, 0, 0], [0, np.cos(theta), -np.sin(theta)], [0, np.sin(theta), np.cos(theta)]])
     return np.dot(R, vector)
 
-
+@numba.jit(nopython=True)
 def y_rotation(vector, theta):
     """Rotates 3-D vector around y-axis"""
     R = np.array([[np.cos(theta), 0, np.sin(theta)], [0, 1, 0], [-np.sin(theta), 0, np.cos(theta)]])
     return np.dot(R, vector)
 
-
+@numba.jit(nopython=True)
 def z_rotation(vector, theta):
     """Rotates 3-D vector around z-axis"""
     R = np.array([[np.cos(theta), -np.sin(theta), 0], [np.sin(theta), np.cos(theta), 0], [0, 0, 1]])
