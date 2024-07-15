@@ -1,23 +1,18 @@
 """
 Script to process raw data and generate dataset's binary files:
     - .npy skeleton data files: np.array of shape B x C x V x T x M
-    - .pkl label files: (filename: str, label: list[int])
+    - .npy label files: (label: list[int])
 """
 import os
 import re
 import glob
-import pickle
-import argparse
+import numba
 import numpy as np
 from tqdm import tqdm
 import multiprocessing
 from numpy.lib.format import open_memmap
 
 from preprocess import pre_normalization
-
-parser = argparse.ArgumentParser(description='Dataset Preprocessing')
-parser.add_argument('--use_mp', type=bool, default=False, help='use multi processing or not')
-
 
 MAX_BODY_TRUE = 2
 MAX_BODY_KINECT = 4
@@ -67,7 +62,7 @@ def read_skeleton_filter(file):
 
     return skeleton_sequence
 
-
+@numba.jit(nopython=True)
 def get_nonzero_std(s):  # tvc
     index = s.sum(-1).sum(-1) != 0  # select valid frames
     s = s[index]
@@ -129,22 +124,13 @@ def gendata(data_path,split):
 if __name__ == '__main__':
 
     path_list = ['data/v1','data/v2']
-    part = ['train', 'test']
-    args = parser.parse_args()
-    # Multiprocessing
-    if args.use_mp:
-        processes = []
-        for path in path_list:
-            for p in part:
-                process = multiprocessing.Process(target=gendata, args=(path, p))
-                processes.append(process)
-                process.start()
-        for process in processes:
-            process.join()
-    # Singleprocessing
-    elif not args.use_mp:
-        for path in path_list:
-            for p in part:
-                gendata(path, p)
-    else:
-        raise ValueError('Invalid option')
+    part = ['train','test']
+    
+    processes = []
+    for path in path_list:
+        for p in part:
+            process = multiprocessing.Process(target=gendata, args=(path, p))
+            processes.append(process)
+            process.start()
+    for process in processes:
+        process.join()
