@@ -1,6 +1,8 @@
+import psutil
 import argparse
 import numpy as np
 from tqdm import tqdm
+from joblib import Parallel, delayed
 from numpy.lib.format import open_memmap
 
 parser = argparse.ArgumentParser(description='Dataset Preprocessing')
@@ -34,15 +36,14 @@ parts = {
 }
 
 # bone
+def calculate_bone(data, v1, v2, fp_sp):
+    fp_sp[:, :, :, v1, :] = data[:, :, :, v1, :] - data[:, :, :, v2, :]
 def gen_bone(dataset, set):
     print(dataset, set)
-    data = open_memmap('./data/{}/{}_joint.npy'.format(dataset, set),mode='r')
+    data = open_memmap('./data/{}/{}_joint.npy'.format(dataset, set), mode='r')
     N, C, T, V, M = data.shape
-    fp_sp = np.zeros((N, 3, T, V, M), dtype='float32')
-    #fp_sp = open_memmap('./data/{}/{}_joint_bone.npy'.format(dataset, set), dtype='float32', mode='w+', shape=(N, 3, T, V, M))
-    for v1, v2 in tqdm(paris[dataset]):
-        fp_sp[:, :, :, v1, :] = data[:, :, :, v1, :] - data[:, :, :, v2, :]
-    np.save('./data/{}/{}_bone.npy'.format(dataset, set), fp_sp)
+    fp_sp = open_memmap('./data/{}/{}_joint_bone.npy'.format(dataset, set), dtype='float32', mode='w+', shape=(N, 3, T, V, M))
+    Parallel(n_jobs=psutil.cpu_count(logical=False))(delayed(calculate_bone)(data, v1, v2, fp_sp) for v1, v2 in tqdm(paris[dataset]))
 
 # jmb
 def merge_joint_bone_data(dataset, set):
@@ -54,15 +55,16 @@ def merge_joint_bone_data(dataset, set):
     data_jpt_bone[:, :C, :, :, :] = data_jpt
     data_jpt_bone[:, C:, :, :, :] = data_bone
 
-def gen_motion(dataset, set,part):
+# motion
+def calculate_motion(data, t, fp_sp):
+    fp_sp[:, :, t, :, :] = data[:, :, t + 1, :, :] - data[:, :, t, :, :]
+def gen_motion(dataset, set, part):
     print(dataset, set, part)
     data = open_memmap('./data/{}/{}_{}.npy'.format(dataset, set, part),mode='r')
     N, C, T, V, M = data.shape
-    fp_sp = np.zeros((N, 3, T, V, M), dtype='float32')
-    for t in tqdm(range(T - 1)):
-        fp_sp[:, :, t, :, :] = data[:, :, t + 1, :, :] - data[:, :, t, :, :]
+    fp_sp = open_memmap('./data/{}/{}_{}_motion.npy'.format(dataset, set, part), dtype='float32', mode='w+', shape=(N, 3, T, V, M))
+    Parallel(n_jobs=psutil.cpu_count(logical=False))(delayed(calculate_motion)(data, t, fp_sp) for t in tqdm(range(T - 1)))
     fp_sp[:, :, T - 1, :, :] = 0
-    np.save('./data/{}/{}_{}_motion.npy'.format(dataset, set, part), fp_sp)
 
 if __name__ == '__main__':
     args = parser.parse_args()

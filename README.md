@@ -2,20 +2,20 @@
 
 Data preparation code to provide consistent and high-performance processing
 
+## dep
+`numpy tqdm numba joblib`
+
 ## dataset
 
 1. UAV-Human: Skeleton (action recognition)
 2. NTURGB-D：Skeleton (action recognition) [ST-GCN]
-2. NTURGB-D：Skeleton (action recognition) [CTR-GCN]
+3. NTURGB-D：Skeleton (action recognition) [CTR-GCN]
 
 ## Target needs
 
-1. Mem：Not greater 16G
+1. Mem：Try to have 0 burden, and the maximum is not more than 2G(In order for it to run in memory-constrained situations)
 2. Time：At least faster than the original code
 
-*We will load data into memory for some operations to speed up, but ensure that the memory requirement is not greater than 16G.*
-
-*16G is not just a project requirement, the test scenario is on a Debian system, and it also starts daily tasks such as browsers*
 ## 注意
 
 1. Data preprocessing uses a lot of performance optimizations, the goal of which is trying to strike a reasonable balance between speed and demand
