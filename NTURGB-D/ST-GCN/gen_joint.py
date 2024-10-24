@@ -1,9 +1,9 @@
 import os
-import pickle
+import psutil
 import argparse
 import numpy as np
 from tqdm import tqdm
-import multiprocessing
+from joblib import Parallel , delayed
 from numpy.lib.format import open_memmap
 
 
@@ -61,6 +61,8 @@ def read_xyz(file, max_body=2, num_joint=25):
                     data[:, n, j, m] = [v['x'], v['y'], v['z']]
                 else:
                     pass
+    # pad to MAX_FRAME
+    data = np.pad(data, ((0, 0), (0, max_frame - data.shape[1]), (0, 0), (0, 0)), 'constant', constant_values=0)
     return data
 
 def gendata(data_path,out_path,ignored_sample_path=None,benchmark='xview',part='eval'):
@@ -99,14 +101,11 @@ def gendata(data_path,out_path,ignored_sample_path=None,benchmark='xview',part='
             sample_name.append(filename)
             sample_label.append(action_class - 1)
 
-    with open('{}/{}_label.pkl'.format(out_path, part), 'wb') as f:
-        pickle.dump((sample_name, list(sample_label)), f)
+    np.save('{}/{}_label.npy'.format(out_path, part), sample_label)
 
     fp = open_memmap('{}/{}_joint.npy'.format(out_path, part),dtype='float32',mode='w+',shape=(len(sample_label), 3, max_frame, num_joint, max_body))
 
-    for i, s in enumerate(tqdm(sample_name)):
-        data = read_xyz(os.path.join(data_path, s), max_body=max_body, num_joint=num_joint)
-        fp[i, :, 0:data.shape[1], :, :] = data
+    Parallel(n_jobs=psutil.cpu_count(logical=False), verbose=0)(delayed(lambda i,s: fp.__setitem__(i,read_xyz(os.path.join(data_path, s), max_body=max_body, num_joint=num_joint)))(i,s) for i,s in enumerate(tqdm(sample_name)))
 
 
 if __name__ == '__main__':
@@ -127,9 +126,5 @@ if __name__ == '__main__':
             out_path = os.path.join(arg.out_folder, b)
             if not os.path.exists(out_path):
                 os.makedirs(out_path)
-            process = multiprocessing.Process(target=gendata, args=(arg.data_path,out_path,arg.ignored_sample_path,b,p))
-            processes.append(process)
-            process.start()
+            gendata(arg.data_path,out_path,arg.ignored_sample_path,b,p)
 
-    for process in processes:
-        process.join()
