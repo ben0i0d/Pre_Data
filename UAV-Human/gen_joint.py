@@ -135,6 +135,7 @@ def gendata(data_path,split):
     data = data.transpose(0, 4, 2, 3, 1)  # N, C, T, V, M  to  N, M, T, V, C
 
     # Center the human at origin
+    # center_joint: body joint index indicating center of body
     # sub the center joint #1 (spine joint in ntu and neck joint in kinetics)'
     for i_s, skeleton in enumerate(data):
         if skeleton.sum() == 0:

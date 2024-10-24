@@ -3,7 +3,7 @@
 Data preparation code to provide consistent and high-performance processing
 
 ## dep
-`numpy tqdm numba joblib`
+`numpy tqdm numba joblib scipy`
 
 ## dataset
 

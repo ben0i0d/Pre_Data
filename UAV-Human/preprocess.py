@@ -13,17 +13,14 @@ import numpy as np
 from tqdm import tqdm
 from joblib import Parallel , delayed
 
-def pre_normalization(data, zaxis=[11, 5], xaxis=[]):
+def pre_normalization(data, zaxis=[11, 5]):
     """
     Normalization steps:
         1) Rotate human to align specified joints to z-axis: ntu [0,1], uav [11,5]
-        2) Rotate human to align specified joints to x-axis: ntu [8,4], uav []
     
     Args:
         data: tensor with skeleton data of shape N, M, T, V, C
-        center_joint: body joint index indicating center of body
         zaxis: list containing 0 or 2 body joint indices (0 skips the alignment)
-        xaxis: list containing 0 or 2 body joint indices (0 skips the alignment)
     """
     def align_human_to_vector(i_s, skeleton, joint_idx1: int, joint_idx2: int, target_vector: list):
         joint1 = skeleton[0, 0, joint_idx1]
@@ -40,13 +37,8 @@ def pre_normalization(data, zaxis=[11, 5], xaxis=[]):
                 for i_j, joint in enumerate(frame):
                     data[i_s, i_p, i_f, i_j] = np.dot(matrix, joint)
     # uav parallel the bone between hip(jpt 11)and spine(jpt 5) of the first person to the z axis
-    if zaxis:
-        print('parallel the bone between hip(jpt %s)' %zaxis[0] + 'and spine(jpt %s) of the first person to the z axis' %zaxis[1])
-        Parallel(n_jobs=psutil.cpu_count(logical=False), verbose=0)(delayed(lambda i,s: align_human_to_vector(i,s,zaxis[0], zaxis[1], [0, 0, 1]))(i,s) for i,s in enumerate(tqdm(data)))
-    # uav not use
-    if xaxis:
-        print('parallel the bone between right shoulder(jpt %s)' %xaxis[0] + 'and left shoulder(jpt %s) of the first person to the x axis' %xaxis[1])
-        Parallel(n_jobs=psutil.cpu_count(logical=False), verbose=0)(delayed(lambda i,s: align_human_to_vector(i,s,xaxis[0], xaxis[1], [1, 0, 0]))(i,s) for i,s in enumerate(tqdm(data)))
+    print('parallel the bone between hip(jpt %s)' %zaxis[0] + 'and spine(jpt %s) of the first person to the z axis' %zaxis[1])
+    Parallel(n_jobs=psutil.cpu_count(logical=False), verbose=0)(delayed(lambda i,s: align_human_to_vector(i,s,zaxis[0], zaxis[1], [0, 0, 1]))(i,s) for i,s in enumerate(tqdm(data)))
     return data
 
 @numba.jit(nopython=True)
