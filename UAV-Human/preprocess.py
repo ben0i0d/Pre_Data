@@ -68,15 +68,7 @@ def rotation_matrix(axis, theta):
                      [2 * (bd + ac), 2 * (cd - ab), aa + dd - bb - cc]])
 
 def angle_between(v1, v2):
-    """ Returns the angle in radians between vectors 'v1' and 'v2'::
-
-            >>> angle_between((1, 0, 0), (0, 1, 0))
-            1.5707963267948966
-            >>> angle_between((1, 0, 0), (1, 0, 0))
-            0.0
-            >>> angle_between((1, 0, 0), (-1, 0, 0))
-            3.141592653589793
-    """
+    """ Returns the angle in radians between vectors 'v1' and 'v2'. """
     if np.abs(v1).sum() < 1e-6 or np.abs(v2).sum() < 1e-6:
         return 0
     """ Returns the unit vector of the vector.  """
