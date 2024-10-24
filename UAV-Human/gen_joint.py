@@ -7,9 +7,10 @@ import os
 import re
 import glob
 import numba
+import psutil
 import numpy as np
 from tqdm import tqdm
-import multiprocessing
+from joblib import Parallel , delayed
 from numpy.lib.format import open_memmap
 
 from preprocess import pre_normalization
@@ -18,9 +19,6 @@ MAX_BODY_TRUE = 2
 MAX_BODY_KINECT = 4
 NUM_JOINT = 17
 MAX_FRAME = 300
-
-FILENAME_REGEX = r'P\d+S\d+G\d+B\d+H\d+UC\d+LC\d+A(\d+)R\d+_\d+'
-
 
 def read_skeleton_filter(file):
     with open(file, 'r') as f:
@@ -87,10 +85,29 @@ def read_xyz(file, max_body, num_joint):
     # select two max energy body
     energy = np.array([get_nonzero_std(x) for x in data])
     index = energy.argsort()[::-1][0:MAX_BODY_TRUE]
-    data = data[index]
+    data = data[index, :MAX_FRAME, :, :]
 
-    data = data.transpose(3, 1, 2, 0)
-    return data
+    # pad to MAX_FRAME
+    data = np.pad(data, ((0, 0), (0, MAX_FRAME - data.shape[1]), (0, 0), (0, 0)), 'constant', constant_values=0)
+    # pad the null frames with the previous frames
+    for i_p, person in enumerate(data):
+        if person.sum() == 0:
+            continue
+        if person[0].sum() == 0:
+            index = (person.sum(-1).sum(-1) != 0)
+            tmp = person[index].copy()
+            person *= 0
+            person[:len(tmp)] = tmp
+        for i_f, frame in enumerate(person):
+            if frame.sum() == 0:
+                if person[i_f:].sum() == 0:
+                    rest = len(person) - i_f
+                    num = int(np.ceil(rest / i_f))
+                    pad = np.concatenate([person[0:i_f] for _ in range(num)], 0)[:rest]
+                    data[i_p, i_f:] = pad
+                    break
+
+    return data.transpose(3, 1, 2, 0) # M,T,V,C To C,T,V,M
 
 
 def gendata(data_path,split):
@@ -98,28 +115,40 @@ def gendata(data_path,split):
     out_path = data_path
     data_path = os.path.join(data_path, split)
 
-    skeleton_filenames = [os.path.basename(f) for f in
-        glob.glob(os.path.join(data_path, "**.txt"), recursive=True)]
+    skeleton_filenames = [os.path.basename(f) for f in glob.glob(os.path.join(data_path, "**.txt"), recursive=True)]
 
-    sample_name = []
-    for basename in skeleton_filenames:
-        filename = os.path.join(data_path, basename)
-        if not os.path.exists(filename):
-            raise OSError('%s does not exist!' %filename)
-        sample_name.append(filename)
+    FILENAME_REGEX = r'P\d+S\d+G\d+B\d+H\d+UC\d+LC\d+A(\d+)R\d+_\d+'
+    label = Parallel(n_jobs=psutil.cpu_count(logical=False), backend='threading', verbose=0)(delayed(lambda i: int(re.match(FILENAME_REGEX, i).groups()[0]))(i) for i in skeleton_filenames)
+    np.save('{}/{}_label.npy'.format(out_path, split), label)
+
+    sample_name = Parallel(n_jobs=psutil.cpu_count(logical=False), backend='threading', verbose=0)(delayed(lambda i: os.path.join(data_path, i))(i) for i in skeleton_filenames)
+
     data = open_memmap('{}/{}_joint.npy'.format(out_path, split),dtype='float32',mode='w+',shape=((len(sample_name), 3, MAX_FRAME, NUM_JOINT, MAX_BODY_TRUE)))
-    for i, s in enumerate(tqdm(sample_name)):
-        sample = read_xyz(s, max_body=MAX_BODY_KINECT, num_joint=NUM_JOINT)
-        sample = sample[:, :MAX_FRAME, :, :]
-        data[i, :, 0:sample.shape[1], :, :] = sample
-    data = pre_normalization(data)
     
-    sample_label = []
-    for basename in skeleton_filenames:
-        label = int(re.match(FILENAME_REGEX, basename).groups()[0])
-        sample_label.append(label)
+    Parallel(n_jobs=psutil.cpu_count(logical=False), verbose=0)(delayed(lambda i,s: data.__setitem__(i,read_xyz(s, max_body=MAX_BODY_KINECT, num_joint=NUM_JOINT)))(i,s) for i,s in enumerate(tqdm(sample_name)))
 
-    np.save('{}/{}_label.npy'.format(out_path, split), np.array(sample_label))
+    # check no skeleton
+    for i in range(len(data)):
+        if np.all(data[i,:] == 0):
+            print("{} {} has no skeleton".format(data_path, i))
+
+    data = data.transpose(0, 4, 2, 3, 1)  # N, C, T, V, M  to  N, M, T, V, C
+
+    # Center the human at origin
+    # sub the center joint #1 (spine joint in ntu and neck joint in kinetics)'
+    for i_s, skeleton in enumerate(data):
+        if skeleton.sum() == 0:
+            continue
+        # skeleton[0][:, center_joint:center_joint+1, :].copy() | uav center_joint=1
+        main_body_center = skeleton[0][:, 1:2, :].copy()
+        for i_p, person in enumerate(skeleton):
+            if person.sum() == 0:
+                continue
+            # reshape(T, V, 1) | uav T=300 v=17
+            mask = (person.sum(-1) != 0).reshape(300, 17, 1)
+            data[i_s, i_p] = (data[i_s, i_p] - main_body_center) * mask
+
+    data = pre_normalization(data).transpose(0, 4, 2, 3, 1) # N, M, T, V, C to N, C, T, V, M
     
 if __name__ == '__main__':
 
@@ -129,8 +158,4 @@ if __name__ == '__main__':
     processes = []
     for path in path_list:
         for p in part:
-            process = multiprocessing.Process(target=gendata, args=(path, p))
-            processes.append(process)
-            process.start()
-    for process in processes:
-        process.join()
+            gendata(path, p)

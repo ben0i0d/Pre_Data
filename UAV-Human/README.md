@@ -1,12 +1,3 @@
-## 依赖库
-
-`numpy tqdm`
-
-## 注意：
-
-1. 完整流程可以直接运行子文件夹下的`ipynb`
-2. 国内注意PIP换源，命令为：`pip config set global.index-url https://mirrors.bfsu.edu.cn/pypi/web/simple`
-
 ## 流程
 
 1. 解压数据集：将`Skeleton.zip`在`data`目录下解压，这一操作会自然的创建出一个子目录`Skeleton`,也就是说，这一操作后，您的目录结构应该是
@@ -32,13 +23,13 @@ data
         ├───P000S00G10B10H10UC022000LC021000A000R0_08241716.txt
         ├───P000S00G10B10H10UC022000LC021000A001R0_08241716.txt
         └───...
-    ├── train_label.pkl
+    ├── train_label.npy
     ├── train_bone_motion.npy
     ├── train_bone.npy
     ├── train_joint_bone.npy
     ├── train_joint_motion.npy
     ├── train_joint.npy
-    ├── test_label.pkl
+    ├── test_label.npy
     ├── test_bone_motion.npy
     ├── test_bone.npy
     ├── test_joint_bone.npy
