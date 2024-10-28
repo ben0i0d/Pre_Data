@@ -1,11 +1,15 @@
 NTURGB-D/ST-GCN/data/nturgb+d_skeletons
-NTURGB-D/ST-GCN/data/nturgbd_skeletons_s001_to_s017.zip
+NTURGB-D/ST-GCN/data/*.zip
 NTURGB-D/ST-GCN/data/xsub
 NTURGB-D/ST-GCN/data/xview
 
 UAV-Human/__pycache__
-UAV-Human/data/Skeleton.zip
+UAV-Human/data/*.zip
 UAV-Human/data/v1
 UAV-Human/data/v2
 UAV-Human/data/Skeleton
 UAV-Human/pose_data_tools/__pycache__
+
+NW-UCLA/data/*.zip
+NW-UCLA/data/all_sqe
+NW-UCLA/data/npy
