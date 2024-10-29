@@ -18,30 +18,30 @@ graph = [(0, 1), (1, 2), (2, 2), (3, 2), (4, 2), (5, 4), (6, 5), (7, 6), (8, 2),
 def gen_bone(set):
     print(set)
     data = open_memmap('./data/npy/{}_joint.npy'.format(set),mode='r')
-    N, C, T, V = data.shape
-    fp_sp = open_memmap('./data/npy/{}_bone.npy'.format(set),dtype='float32',mode='w+',shape=(N, 3, T, V))
+    N, C, T, V, M = data.shape
+    fp_sp = open_memmap('./data/npy/{}_bone.npy'.format(set),dtype='float32',mode='w+',shape=(N, 3, T, V, M))
     for v1, v2 in tqdm(graph):
-        fp_sp[:, :, :, v1] = data[:, :, :, v1] - data[:, :, :, v2]
+        fp_sp[:, :, :, v1, :] = data[:, :, :, v1, :] - data[:, :, :, v2, :]
 
 # jmb
 def merge_joint_bone_data(set):
     print(set)
     data_jpt = open_memmap('./data/npy/{}_joint.npy'.format(set), mode='r')
     data_bone = open_memmap('./data/npy/{}_bone.npy'.format(set), mode='r')
-    N, C, T, V = data_jpt.shape
-    data_jpt_bone = open_memmap('./data/npy/{}_joint_bone.npy'.format(set), dtype='float32', mode='w+', shape=(N, 6, T, V))
-    data_jpt_bone[:, :C, :, :] = data_jpt
-    data_jpt_bone[:, C:, :, :] = data_bone
+    N, C, T, V, M = data_jpt.shape
+    data_jpt_bone = open_memmap('./data/npy/{}_joint_bone.npy'.format(set), dtype='float32', mode='w+', shape=(N, 6, T, V, M))
+    data_jpt_bone[:, :C, :, :, :] = data_jpt
+    data_jpt_bone[:, C:, :, :, :] = data_bone
 
 # motion  
-def gen_motion(set,part):
+def gen_motion(set, part):
     print(set, part)
     data = open_memmap('./data/npy/{}_{}.npy'.format(set, part),mode='r')
-    N, C, T, V = data.shape
-    fp_sp = open_memmap('./data/npy/{}_{}_motion.npy'.format(set, part),dtype='float32',mode='w+',shape=(N, 3, T, V))
+    N, C, T, V, M = data.shape
+    fp_sp = open_memmap('./data/npy/{}_{}_motion.npy'.format(set, part),dtype='float32',mode='w+',shape=(N, 3, T, V, M))
     for t in tqdm(range(T - 1)):
-        fp_sp[:, :, t, :] = data[:, :, t + 1, :] - data[:, :, t, :]
-    fp_sp[:, :, T - 1, :] = 0
+        fp_sp[:, :, t, :, :] = data[:, :, t + 1, :, :] - data[:, :, t, :, :]
+    fp_sp[:, :, T - 1, :, :] = 0
 
 if __name__ == '__main__':
     args = parser.parse_args()

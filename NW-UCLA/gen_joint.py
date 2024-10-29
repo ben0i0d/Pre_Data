@@ -39,7 +39,11 @@ if __name__ == '__main__':
             val_label.append(label)
 
     train_data = np.array(train_data).transpose(0, 3, 1, 2) # N T V C to N C T V
+    train_data = np.expand_dims(train_data, axis=4) # N C T V to N T C V M
+
     val_data = np.array(val_data).transpose(0, 3, 1, 2) # N T V C to N C T V
+    val_data = np.expand_dims(val_data, axis=4) # N C T V to N T C V M
+
     train_label = np.array(train_label) - 1 # label start 1 to 0
     val_label = np.array(val_label) - 1 # label start 1 to 0
 
