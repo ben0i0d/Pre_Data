@@ -1,6 +1,12 @@
+import numba
+import psutil
 import argparse
+import numpy as np
 from tqdm import tqdm
+from joblib import Parallel , delayed
 from numpy.lib.format import open_memmap
+
+from get_angle import getThridOrderRep
 
 parser = argparse.ArgumentParser(description='Dataset Preprocessing')
 parser.add_argument('--modal', type=str, default='bone', help='gen_modal')
@@ -45,6 +51,34 @@ def gen_motion(dataset, set,part):
         fp_sp[:, :, t, :, :] = data[:, :, t + 1, :, :] - data[:, :, t, :, :]
     fp_sp[:, :, T - 1, :, :] = 0
 
+# angle ,From UAV-SAR
+def gen_angle(dataset, set):
+    print(dataset, set)
+    data = open_memmap('./data/{}/{}_joint.npy'.format(dataset, set),mode='r')
+    N, C, T, V, M = data.shape
+    fp_sp = open_memmap('./data/{}/{}_angle.npy'.format(dataset, set),dtype='float32',mode='w+',shape=(N, 9, T, V, M))
+    Parallel(n_jobs=psutil.cpu_count(logical=False), verbose=0)(delayed(lambda i: fp_sp.__setitem__(i,getThridOrderRep(data[i])))(i) for i in tqdm(range(len(data))))
+
+# reverse , From FR-AGCN
+@numba.jit(nopython=True)
+def reverse(data):
+    C, T, V, M = data.shape
+    arr = data.transpose(1,0,2,3) # C T V M to T C V M
+    for i in range(T):
+        if np.all(arr[i]==0):
+            zidx = i
+    zidx = T
+    tmp = np.zeros((C, T, V, M))
+    tmp[:, :zidx, :, :] = data[:, zidx-1::-1, :, :]
+    return tmp
+
+def gen_reverse(dataset, set):    
+    print(dataset, set)
+    data = open_memmap('./data/{}/{}_joint.npy'.format(dataset, set),mode='r')
+    N, C, T, V, M = data.shape
+    fp_sp = open_memmap('./data/{}/{}_joint_reverse.npy'.format(dataset, set),dtype='float32',mode='w+',shape=(N, 3, T, V, M))
+    Parallel(n_jobs=psutil.cpu_count(logical=False), verbose=0)(delayed(lambda i: fp_sp.__setitem__(i,reverse(data[i])))(i) for i in tqdm(range(len(data))))
+    
 if __name__ == '__main__':
     args = parser.parse_args()
 
@@ -61,5 +95,13 @@ if __name__ == '__main__':
             for set in sets:
                 for part in parts:
                     gen_motion(dataset, set, part)
+    elif args.modal == 'angle':
+        for dataset in datasets:
+            for set in sets:
+                gen_angle(dataset, set)
+    elif args.modal == 'reverse':
+        for dataset in datasets:
+            for set in sets:
+                gen_reverse(dataset, set)
     else:
         raise ValueError('Invalid Modal')
