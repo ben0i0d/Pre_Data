@@ -57,7 +57,7 @@ def gen_angle(dataset, set):
     data = open_memmap('./data/{}/{}_joint.npy'.format(dataset, set),mode='r')
     N, C, T, V, M = data.shape
     fp_sp = open_memmap('./data/{}/{}_angle.npy'.format(dataset, set),dtype='float32',mode='w+',shape=(N, 9, T, V, M))
-    Parallel(n_jobs=psutil.cpu_count(logical=False), verbose=0)(delayed(lambda i: fp_sp.__setitem__(i,getThridOrderRep(data[i])))(i) for i in tqdm(range(len(data))))
+    Parallel(n_jobs=psutil.cpu_count(logical=False), verbose=0)(delayed(lambda i: fp_sp.__setitem__(i,getThridOrderRep(data[i])))(i) for i in tqdm(range(N)))
 
 # reverse , From FR-AGCN
 @numba.jit(nopython=True)
@@ -77,7 +77,7 @@ def gen_reverse(dataset, set):
     data = open_memmap('./data/{}/{}_joint.npy'.format(dataset, set),mode='r')
     N, C, T, V, M = data.shape
     fp_sp = open_memmap('./data/{}/{}_joint_reverse.npy'.format(dataset, set),dtype='float32',mode='w+',shape=(N, 3, T, V, M))
-    Parallel(n_jobs=psutil.cpu_count(logical=False), verbose=0)(delayed(lambda i: fp_sp.__setitem__(i,reverse(data[i])))(i) for i in tqdm(range(len(data))))
+    Parallel(n_jobs=psutil.cpu_count(logical=False), verbose=0)(delayed(lambda i: fp_sp.__setitem__(i,reverse(data[i])))(i) for i in tqdm(range(N)))
     
 if __name__ == '__main__':
     args = parser.parse_args()

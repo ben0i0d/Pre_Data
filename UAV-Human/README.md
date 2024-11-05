@@ -13,7 +13,7 @@ data
 5. 数据集处理出motion模态数据（可选）：运行`python gen_modal.py --modal motion`得到motion模态的数据
 6. bone模态与joint模态合并（可选）：运行`python gen_modal.py --modal jmb`得到合并模态的数据
 7. 数据集处理出angle模态数据（可选）：运行`python gen_modal.py --modal angle`得到motion模态的数据
-8. bone模态与joint_reverse模态合并（可选）：运行`python gen_modal.py --modal reverse`得到合并模态的数据
+8. 数据集处理出reverse模态合并（可选）：运行`python gen_modal.py --modal reverse`得到合并模态的数据
 9. 最终你会得到如下所展示的目录结构与文件
 ```
 └───data/v1
