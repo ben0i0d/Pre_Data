@@ -1,5 +1,5 @@
-import numpy as np
 import numba
+import numpy as np
 
 # C * T * V * M   [3, T, 25, 2]
 local_linkage = [
@@ -60,27 +60,16 @@ torso_linkage = [
 def _calculate_angle(frame_data, joint_unit):
 	# frame_data   3 x 17 x 2
 	skeleton_num = frame_data.shape[2]
-
+	
 	angle_rep = np.zeros(skeleton_num)
+
 	if joint_unit == (0, 0, 0):
 		return angle_rep
-
 	for m in range(skeleton_num):
 		# for outer node1
-		x_temp_out = frame_data[0, joint_unit[0], m]
-		y_temp_out = frame_data[1, joint_unit[0], m]
-		z_temp_out = frame_data[2, joint_unit[0], m]
-		outer_node1 = np.array([x_temp_out, y_temp_out, z_temp_out])
-
-		x_temp_out = frame_data[0, joint_unit[1], m]
-		y_temp_out = frame_data[1, joint_unit[1], m]
-		z_temp_out = frame_data[2, joint_unit[1], m]
-		center_node = np.array([x_temp_out, y_temp_out, z_temp_out])
-
-		x_temp_out = frame_data[0, joint_unit[2], m]
-		y_temp_out = frame_data[1, joint_unit[2], m]
-		z_temp_out = frame_data[2, joint_unit[2], m]
-		outer_node2 = np.array([x_temp_out, y_temp_out, z_temp_out])
+		outer_node1 = np.array([frame_data[0, joint_unit[0], m], frame_data[1, joint_unit[0], m], frame_data[2, joint_unit[0], m]])
+		center_node = np.array([frame_data[0, joint_unit[1], m], frame_data[1, joint_unit[1], m], frame_data[2, joint_unit[1], m]])
+		outer_node2 = np.array([frame_data[0, joint_unit[2], m], frame_data[1, joint_unit[2], m], frame_data[2, joint_unit[2], m]])
 
 		bone_vec1 = outer_node1 - center_node
 		bone_vec2 = outer_node2 - center_node
@@ -91,36 +80,20 @@ def _calculate_angle(frame_data, joint_unit):
 
 def getThridOrderRep(frames_data):
 	# frames_data   3 x frame_num x 17 x 2
-	frame_num = frames_data.shape[1]
-	skeleton_num = frames_data.shape[3]
-	ThridOrderRepfeature = np.zeros((9, frame_num, 17, skeleton_num))
-
-	for frame_index in range(frame_num):
+	C, T, V, M = frames_data.shape
+	ThridOrderRepfeature = np.zeros((9, T, 17, M))
+	for frame_index in range(T):
 		frame_data = frames_data[:, frame_index, :, :]
-
 		for joint_idx in range(17):
 			# local_linkage
-			ThridOrderRepfeature[0, frame_index, joint_idx, :] = \
-				_calculate_angle(frame_data, local_linkage[joint_idx])
+			ThridOrderRepfeature[0, frame_index, joint_idx, :] = _calculate_angle(frame_data, local_linkage[joint_idx]) 
 			# pair_wise
-			ThridOrderRepfeature[1, frame_index, joint_idx, :] = \
-				_calculate_angle(frame_data, pairwise_linkage[joint_idx][0])
-			ThridOrderRepfeature[2, frame_index, joint_idx, :] = \
-				_calculate_angle(frame_data, pairwise_linkage[joint_idx][1])
-			ThridOrderRepfeature[3, frame_index, joint_idx, :] = \
-				_calculate_angle(frame_data, pairwise_linkage[joint_idx][2])
-			ThridOrderRepfeature[4, frame_index, joint_idx, :] = \
-				_calculate_angle(frame_data, pairwise_linkage[joint_idx][3])
+			for i in range(4):
+				ThridOrderRepfeature[i+1, frame_index, joint_idx, :] = _calculate_angle(frame_data, pairwise_linkage[joint_idx][i]) 
 			# torso
-			ThridOrderRepfeature[5, frame_index, joint_idx, :] = \
-				_calculate_angle(frame_data, torso_linkage[joint_idx][0])
-			ThridOrderRepfeature[6, frame_index, joint_idx, :] = \
-				_calculate_angle(frame_data, torso_linkage[joint_idx][1])
-			ThridOrderRepfeature[7, frame_index, joint_idx, :] = \
-				_calculate_angle(frame_data, torso_linkage[joint_idx][2])
-			ThridOrderRepfeature[8, frame_index, joint_idx, :] = \
-				_calculate_angle(frame_data, torso_linkage[joint_idx][3])
-
+			for i in range(4):
+				ThridOrderRepfeature[i+5, frame_index, joint_idx, :] = _calculate_angle(frame_data, torso_linkage[joint_idx][i]) 
+	 
 	return ThridOrderRepfeature
 
 @numba.jit(nopython=True)
@@ -132,5 +105,4 @@ def _included_angle_rep(vec1, vec2):
 
 	cosined_angle = dotProd / normProd
 	# included_ang = np.arccos(cosined_angle)
-	rep = 1 - cosined_angle
-	return rep
+	return (1 - cosined_angle)
