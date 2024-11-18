@@ -13,3 +13,9 @@ UAV-Human/pose_data_tools/__pycache__
 NW-UCLA/data/*.zip
 NW-UCLA/data/all_sqe
 NW-UCLA/data/npy
+
+MIMII/data/*.zip
+MIMII/data/*.pkl
+NW-UCLA/data/6dB
+NW-UCLA/data/0dB
+NW-UCLA/data/-6dB
