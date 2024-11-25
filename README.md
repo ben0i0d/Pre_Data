@@ -11,11 +11,13 @@ Data preparation code to provide consistent and high-performance processing
 2. NTURGB-D：Skeleton [ST-GCN]  --> `N C T V M`
 3. NTURGB-D：Skeleton [CTR-GCN]
 4. NW-UCLA：Skeleton  --> `N C T V M`
+5. MIMII：Audio  --> `[SNR[MFCC,device,label]]`
+6. SHL-2024: seqence  --> `Frames Channel sample`
 
 ## Target needs
 
-1. Mem：Try to have 0 burden, and the maximum is not more than 2G(In order for it to run in memory-constrained situations)
-2. Time：At least faster than the original code
+1. Mem：Try to minimize memory consumption
+2. Time：Faster as well as possible
 
 ## Be care
 

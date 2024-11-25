@@ -16,6 +16,11 @@ NW-UCLA/data/npy
 
 MIMII/data/*.zip
 MIMII/data/*.pkl
-NW-UCLA/data/6dB
-NW-UCLA/data/0dB
-NW-UCLA/data/-6dB
+MIMII/data/6dB
+MIMII/data/0dB
+MIMII/data/-6dB
+
+SHL-2024/data/*.7z
+SHL-2024/data/raw_data
+SHL-2024/data/npy_data
+SHL-2024/data/fft_data
