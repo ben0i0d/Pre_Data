@@ -12,7 +12,7 @@ Data preparation code to provide consistent and high-performance processing
 3. NTURGB-D：Skeleton [CTR-GCN]
 4. NW-UCLA：Skeleton  --> `N C T V M`
 5. MIMII：Audio  --> `[SNR[MFCC,device,label]]`
-6. SHL-2024: seqence  --> `Frames Channel sample`
+6. SHL-2024: seqence  --> `Modal Channel Num sample`
 
 ## Target needs
 
